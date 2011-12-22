@@ -1,0 +1,237 @@
+shouldDo.org
+
+* about
+FILENAME:  shouldDo.org
+VERSION:   1.7.0
+DATE:      2011/12/22
+URL:       http://shouldDo.org
+AUTHOR:    Ben Gerber (http://privacy.us/contact  http://twitter.com/gerber ) 
+COPYRIGHT: (C) Ben Gerber 2009, 2011
+LICENSE:   Creative Commons Attribution 3.0 License (http://creativecommons.org/licenses/by/3.0/ )
+
+The audience for this file are Org-Mode (http://orgmode.org ) users.
+
+Like you, I use Org-Mode to manage ToDOs.
+shouldDo.org is an Org-Mode "spreadsheet" to help you focus on your ShouldDOs, activities you should be doing to achieve results/outcomes/impact.
+
+shouldDo.org tracks your weekly progress as a "score" (where perfect equals 100) as you perform these activities.
+
+** Future
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+*** Create an HTML/JavaScript implementation, making this tool useful for a much wider audience.
+*** Remove the need for a shell script; make it work entirely inside Emacs and/or improve the shell script.
+*** This might make for a cool Emacs major mode.
+
+** Implementation notes
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+   I like having this type of tool in Emacs, though I intend to (eventually) create an HTML/JavaScript implementation usable within browsers (desktop and mobile).
+   I experimented with implementing shouldDo.org using Org-Mode's columnview (with calculations performed in a table captured from columnview), while this is plausible, I went with Org-Mode tables as a matter of preference.
+
+
+* setup
+** 0.) This version of shouldDo.org has been tested in GNU Emacs version 23.3.1 with Org-Mode version 7.6 and with Org-Mode version 7.8
+** 1.) Enter your ShouldDO activities
+   In the table under 'edit activities' add your ShouldDo activities; for each activity (up to 10), enter an activity name, weekly goal quantity, unit of measurement for the weekly goal, and a weight (importance) value.
+   The total weight for all activities must equal 100 (or whatever number you wish to be considered a perfect score).
+   If you have more than 10 activities, you are not picking the right ones.
+*** Note
+    While these activities should remain fairly static for a long time, you can update these activities as needed for a new week.
+    For example, for some people, this type of activity works well:
+|---+----+---------------+-------------+-------+--------|
+| ! | id | activity name | weekly goal | units | weight |
+|---+----+---------------+-------------+-------+--------|
+|   |  1 | school work   |          20 | hrs   |     25 |
+
+    For other folks, they may want to have an activity such as this in the beginning of a school semester:
+|---+----+------------------+-------------+-------+--------|
+| ! | id | activity name    | weekly goal | units | weight |
+|---+----+------------------+-------------+-------+--------|
+|   |  1 | read course text |         200 | pages |     25 |
+
+    and later change it to this:
+|---+----+-------------------------------+-------------+-------+--------|
+| ! | id | activity name                 | weekly goal | units | weight |
+|---+----+-------------------------------+-------------+-------+--------|
+|   |  1 | research & write course paper |          20 | hrs   |     25 |
+
+** 2.) Edit the shell script shouldDo_newWeek.sh
+   Set the location of your shouldDo.org file and the location of a backup directory, e.g.:
+   shouldDoFile="/home/you/shouldDo.org"
+   shouldDoBakupDir="/home/you/shouldDoBakupDir/"
+   Include the trailing slash for shouldDoBakupDir.
+
+** 3.) Add the shell script 'shouldDo_newWeek.sh' to your crontab, to run late Sunday night or early Monday morning.
+   (You could, of course, also run it manually.)
+   The shell script moves your past week's score to the history table and resets the 'activities log' table.
+
+** 4.) Whenever you open your shouldDo.org file, after you edit your activities, or when you want to calculate your latest score, execute 'org-table-iterate-buffer-tables' -- three different ways to do this:
+*** With 'M-x'
+    M-x load-library
+    Then enter: org-table
+    M-x org-table-iterate-buffer-tables
+*** Bind a key combination (e.g., 'C-ct')
+    In your Emacs init file (.emacs file) add:
+    (require 'org-table)
+    (global-set-key "\C-ct" 'org-table-iterate-buffer-tables)
+*** Evaluate the "Library of Babel" code block under 'update tables'
+    With your cursor on the code block, 'C-c C-c'
+    Setting (org-confirm-babel-evaluate nil) will remove the yes/no prompt; however, be sure to read the below information before doing this.
+**** More information about evaluating code blocks
+     http://orgmode.org/manual/Evaluating-code-blocks.html#Evaluating-code-blocks
+     http://orgmode.org/manual/Code-evaluation-security.html#Code-evaluation-security
+
+** 5.) You can remove or relocate the 'about' and 'setup' (and if your not using it, 'update tables') sections in your shouldDo.org file
+
+** 6.) Log your progress toward achieving your ShouldDo activities under 'activities log' daily
+
+** 7.) Be sure to execute 'org-table-iterate-buffer-tables' (see step 4 above) and save your shouldDo.org file before your weekly cron job runs
+
+
+** Hints
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+*** Columns automatically realign when you hit TAB (with your cursor in a table)
+*** Rows that start with '#' automatically (re)calculate when you hit TAB
+*** Fields not intended to be edited will automatically "correct" when you hit TAB
+*** If you hose up a table, formula, etc. -- just copy/paste it from a fresh copy of shouldDO.org (from http://shouldDO.org )
+*** An "Args out of range" error will occur until you have a history of 52 (or more) weeks, it is safe to ignore this error.
+*** Table formulas are long -- but will not get in your way if you have truncate-lines on (or visual-line-mode off)
+**** I often toggle visual-line-mode, with the following in my .emacs file, its as easy as pressing F7
+     ;; easy word wrap
+     (global-set-key (kbd "<f7>") 'visual-line-mode)
+     (global-set-key (kbd "C-<f7>") 'toggle-truncate-lines)
+
+
+** Upgrade
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+To upgrade from a prior version of shouldDO.org, just replace the tables under 'view history' and 'edit activities' in this file with the same tables from your prior version shouldDO.org file.
+
+
+** Customization
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+*** You can relocate the tables within the shouldDo.org file without affecting the functionality.
+*** To change the start of week to Sunday, instead of Monday, change two portions of the formula for the 'activities log' table
+**** day of the week headers, i.e,
+     change this:
+     ::@1$4=Mo::@1$5=Tu::@1$6=We::@1$7=Th::@1$8=Fr::@1$9=Sa::@1$10=Su
+     to this:
+     ::@1$4=Su::@1$5=Mo::@1$6=Tu::@1$7=We::@1$8=Th::@1$9=Fr::@1$10=Sa
+**** week (of the year) number, i.e.,
+     change this:
+     ::@12$5='(print(format-time-string "%W"))
+     to this:
+     ::@12$5='(print(format-time-string "%U"))
+
+*** If you make changes to the tables, be sure to address these dependencies:
+**** The 'shouldDo_newWeek.sh' script is dependent on a specific format for the 'activities log' table.
+**** The 'shouldDo_newWeek.sh' script is dependent on a specific format for the 'view history' table.
+**** The 'activities log' table reads data form the 'edit activities' table.
+**** The 'scores' table reads data from the 'view history' table.
+
+*** For information on Org-Mode's table editor's spreadsheet-like capabilities, see:
+    http://orgmode.org/manual/The-spreadsheet.html#The-spreadsheet
+
+
+* update tables
+'C-c C-c' while the cursor is in the below code block updates (recalculates) the tables
+#+begin_src emacs-lisp
+(require 'org-table)
+(org-table-iterate-buffer-tables)
+#+end_src
+
+#+results:
+: t
+
+* activities log
+|---+----+----------------+----+----+----+----+----+----+----+--------+-------+------+-----+----+--------|
+| # | id | activity       | Mo | Tu | We | Th | Fr | Sa | Su | units  |  prog | goal |   % | wt | points |
+|---+----+----------------+----+----+----+----+----+----+----+--------+-------+------+-----+----+--------|
+| # |  1 | activity1 name |  3 |  1 |  2 |    |    |    |    | hrs    |     6 |    8 |  75 | 20 |  15.00 |
+| # |  2 | activity2 name |    |    |    |    |    |  1 |  3 | hrs    |     4 |    4 | 100 |  5 |   5.00 |
+| # |  3 | activity3 name |  1 |    |  1 |    |  1 |  1 |  1 | meals  |     5 |    5 | 100 | 20 |  20.00 |
+| # |  4 | activity4 name |  2 |    |  2 |  3 |    |    |  1 | n#     |     8 |   10 |  80 | 30 |  24.00 |
+| # |  5 | activity5 name | 10 |    | 10 |    |    | 10 |    | pages  |    30 |   30 | 100 |  5 |   5.00 |
+| # |  6 | activity6 name |    |    |    |    |    |  5 |    | miles  |     5 |    7 |  71 | 10 |   7.14 |
+| # |  7 | activity7 name |  0 |  0 |  2 |  3 |  5 |  7 | 13 | smiles |    30 |   42 |  71 | 10 |   7.14 |
+| # |  8 | 0              |    |    |    |    |    |    |    | 0      |     0 |    0 |   0 |  0 |   0.00 |
+| # |  9 | 0              |    |    |    |    |    |    |    | 0      |     0 |    0 |   0 |  0 |   0.00 |
+| # | 10 | 0              |    |    |    |    |    |    |    | 0      |     0 |    0 |   0 |  0 |   0.00 |
+|---+----+----------------+----+----+----+----+----+----+----+--------+-------+------+-----+----+--------|
+| # |  y | 2011           | w# | 51 |    |    |    |    |    |        | SCORE |      |     |    |  83.28 |
+|---+----+----------------+----+----+----+----+----+----+----+--------+-------+------+-----+----+--------|
+  #+TBLFM: @1$1='(format "#")::@2$1='(format "#")::@3$1='(format "#")::@4$1='(format "#")::@5$1='(format "#")::@6$1='(format "#")::@7$1='(format "#")::@8$1='(format "#")::@9$1='(format "#")::@10$1='(format "#")::@11$1='(format "#")::@12$1='(format "#")::$2=remote(a,@@#$2)::$3=remote(a,@@#$3)::$11=remote(a,@@#$5)::$12=vsum($4..$10);N::$13=remote(a,@@#$4);N::$14=($12/$13)*100;%.0f::$15=remote(a,@@#$6);N::$16=($12/$13)*$15;%.2f::@1$2=id::@1$3=activity::@1$4=Mo::@1$5=Tu::@1$6=We::@1$7=Th::@1$8=Fr::@1$9=Sa::@1$10=Su::@1$11=units::@1$12=prog::@1$13=goal::@1$14='(format "%%")::@1$15=wt::@1$16=points::@12$2=y::@12$3='(print(format-time-string "%Y"))::@12$4='(format "w#")::@12$5='(print(format-time-string "%W"))::@12$6='(format "")::@12$7='(format "")::@12$8='(format "")::@12$9='(format "")::@12$10='(format "")::@12$11='(format "")::@12$12=SCORE::@12$13='(format "")::@12$14='(format "")::@12$15='(format "")::@12$16=vsum(@II..III);%.2f
+
+* scores
+|---+---------------+------|
+| # | scores        |      |
+|---+---------------+------|
+| # | avg           | 0.00 |
+| # | last week     | 0.00 |
+| # | past month    | 0.00 |
+| # | past 3 months | 0.00 |
+| # | past 6 months | 0.00 |
+| # | past year     | 0.00 |
+|---+---------------+------|
+  #+TBLFM: @1$1='(format "#")::@2$1='(format "#")::@3$1='(format "#")::@4$1='(format "#")::@5$1='(format "#")::@6$1='(format "#")::@7$1='(format "#")::@1$2=scores::@1$3='(format "")::@2$2=avg::@3$2='(format "last week")::@4$2='(format "past month")::@5$2='(format "past 3 months")::@6$2='(format "past 6 months")::@7$2='(format "past year")::@2$3=remote(h,@2$5);%.2f::@3$3=remote(h,@2$4);%.2f::@4$3=remote(h,@2$6);%.2f::@5$3=remote(h,@2$7);%.2f::@6$3=remote(h,@2$8);%.2f::@7$3=remote(h,@2$9);%.2f
+
+* view history
+  :PROPERTIES:
+  :VISIBILITY: folded
+  :END:
+#+TBLNAME: h
+|---+------+------+-------+------+---+-----+-----+---|
+| # | year | week | score | avg  | m | 3 m | 6 m | y |
+|---+------+------+-------+------+---+-----+-----+---|
+| # |      |      |       | 0.00 |   |     |     |   |
+|---+------+------+-------+------+---+-----+-----+---|
+  #+TBLFM: $1='(format "#")::@1$2=year::@1$3=week::@1$4=score::$5='(format "")::$6='(format "")::$7='(format "")::$8='(format "")::$9='(format "")::@1$5=avg::@1$6=m::@1$7=3m::@1$8=6m::@1$9=y::@2$5=vmean(@II..III$3);%.2f::@2$6=vmean(@2..@6$3);%.2f::@2$7=vmean(@2..@14$3);%.2f::@2$8=vmean(@2..@26$3);%.2f::@2$9=vmean(@2..@54$3);%.2f
+
+* edit activities
+  :PROPERTIES:
+  :VISIBILITY: folded
+  :END:
+#+TBLNAME: a
+|---+----+----------------+-------------+--------+--------|
+| # | id | activity name  | weekly goal | units  | weight |
+|---+----+----------------+-------------+--------+--------|
+| # |  1 | activity1 name |           8 | hrs    |     20 |
+| # |  2 | activity2 name |           4 | hrs    |      5 |
+| # |  3 | activity3 name |           5 | meals  |     20 |
+| # |  4 | activity4 name |          10 | n#     |     30 |
+| # |  5 | activity5 name |          30 | pages  |      5 |
+| # |  6 | activity6 name |           7 | miles  |     10 |
+| # |  7 | activity7 name |          42 | smiles |     10 |
+| # |  8 |                |             |        |        |
+| # |  9 |                |             |        |        |
+| # | 10 |                |             |        |        |
+|---+----+----------------+-------------+--------+--------|
+| # |    | TOTAL          |             |        |    100 |
+|---+----+----------------+-------------+--------+--------|
+  #+TBLFM: @1$1='(format "#")::@2$1='(format "#")::@3$1='(format "#")::@4$1='(format "#")::@5$1='(format "#")::@6$1='(format "#")::@7$1='(format "#")::@8$1='(format "#")::@9$1='(format "#")::@10$1='(format "#")::@11$1='(format "#")::@12$1='(format "#")::@1$2=id::@1$3='(format "activity name")::@1$4='(format "weekly goal")::@1$5=units::@1$6=weight::$2=@-1 + 1::@2$2=1::@12$2='(format "")::@12$3=TOTAL::@12$4='(format "")::@12$5='(format "")::@12$6=vsum(@II..III)
+
+The total weight for all activities must equal 100 (or whatever number you wish to be considered a perfect score).
+An activity with no weight is not counted toward or against your score.
+Example units: n#, hrs, deliverables, pages, meals, miles, km, smiles (note that "#" by itself will cause an error).
+
+* settings
+  :PROPERTIES:
+  :VISIBILITY: folded
+  :FILENAME: shouldDo.org
+  :VERSION:  1.7.0
+  :DATE:     2011/12/22
+  :URL:      http://shouldDo.org
+  :AUTHOR:   Ben Gerber (http://privacy.us/contact  http://twitter.com/gerber ) 
+  :COPYRIGHT: (C) Ben Gerber 2009, 2011
+  :LICENSE:  Creative Commons Attribution 3.0 License (http://creativecommons.org/licenses/by/3.0/ )
+  :END:
+** display on open
+#+STARTUP: showall
