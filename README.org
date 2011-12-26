@@ -1,0 +1,170 @@
+* about shouldDo
+  :PROPERTIES:
+  :FILENAME: README.org
+  :VERSION:  1.7.1
+  :DATE:     2011/12/26
+  :URL:      http://shouldDo.org
+  :AUTHOR:   Ben Gerber (http://privacy.us/contact  http://twitter.com/gerber ) 
+  :COPYRIGHT: (C) Ben Gerber 2009, 2011
+  :LICENSE:  Creative Commons Attribution 3.0 License (http://creativecommons.org/licenses/by/3.0/ )
+  :END:
+
+shouldDo is an [[http://orgmode.org][Org-Mode]] "spreadsheet" to help you focus on your ShouldDOs, activities you should be doing to achieve results/outcomes/impact.
+(shouldDo compliments utilizing Org-Mode to manage your ToDOs.)
+
+shouldDo tracks your weekly progress as a "score" (where perfect equals 100) as you perform these activities.
+
+** shouldDo is composed of three files
+*** shouldDo.org includes four Org-Mode tables (and formulas) for:
+**** entering your progress and showing your current-week score ('activities log')
+**** viewing your score statistics ('scores')
+**** viewing your score history ('view history')
+**** editing your activities ('edit activities')
+*** shouldDo_newWeek.py is a Python script that moves your past week's score to the 'view history' table and resets the 'activities log' table.
+*** README.org is this file.
+
+** website
+[[http://shouldDo.org][shouldDo.org]]
+
+** Future
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+*** Create an HTML/JavaScript implementation, making this tool useful for a much wider audience.
+*** This might make for a cool Emacs major mode.
+
+** Implementation notes
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+   I like having this type of tool in Emacs, though I intend to (eventually) create an HTML/JavaScript implementation usable within browsers (desktop and mobile).
+   I experimented with implementing shouldDo.org using Org-Mode's columnview (with calculations performed in a table captured from columnview), while this is plausible, I went with Org-Mode tables as a matter of preference.
+
+
+* setup and use
+** 0.) This version of shouldDo.org has been tested in GNU Emacs version 23.3.1 with Org-Mode version 7.6 and with Org-Mode version 7.8
+** 1.) Enter your ShouldDO activities in the Org-Mode file shouldDo.org
+   In the table under 'edit activities' add your ShouldDo activities; for each activity (up to 10), enter an activity name, weekly goal quantity, unit of measurement for the weekly goal, and a weight (importance) value.
+   The total weight for all activities must equal 100 (or whatever number you wish to be considered a perfect score).
+   If you have more than 10 activities, you are not picking the right ones.
+*** Updating activities
+    While your activities should remain fairly static for a long time, you can update your activities as needed for a new week.
+    For example, for some people, this type of activity works well:
+|---+----+---------------+-------------+-------+--------|
+| ! | id | activity name | weekly goal | units | weight |
+|---+----+---------------+-------------+-------+--------|
+|   |  1 | school work   |          20 | hrs   |     25 |
+
+    For other folks, they may want to have an activity such as this in the beginning of a school semester:
+|---+----+------------------+-------------+-------+--------|
+| ! | id | activity name    | weekly goal | units | weight |
+|---+----+------------------+-------------+-------+--------|
+|   |  1 | read course text |         200 | pages |     25 |
+
+    and later change it to this:
+|---+----+-------------------------------+-------------+-------+--------|
+| ! | id | activity name                 | weekly goal | units | weight |
+|---+----+-------------------------------+-------------+-------+--------|
+|   |  1 | research & write course paper |          20 | hrs   |     25 |
+
+** 2.) Enter file location settings in the SETTINGS section of the Python script shouldDo_newWeek.py
+   Set the location of your shouldDo.org file and the location of a backup directory, e.g.:
+
+   shouldDoFile = '/home/you/shouldDo.org'
+   shouldDoBakupDir = '/home/you/shouldDoBakupDir'
+
+   A trailing slash for shouldDoBakupDir is optional
+
+** 3.) Add the Python script 'shouldDo_newWeek.py' to your crontab, to run late Sunday night or early Monday morning.
+   (You could, of course, also run it manually.)
+
+** 4.) Whenever you open your shouldDo.org file, after you edit your activities, or when you want to calculate your latest score, execute 'org-table-iterate-buffer-tables' -- three different ways to do this:
+*** With 'M-x'
+    M-x load-library
+    Then enter: org-table
+    M-x org-table-iterate-buffer-tables
+*** Bind a key combination (e.g., 'C-ct')
+    In your Emacs init file (.emacs file) add:
+    (require 'org-table)
+    (global-set-key "\C-ct" 'org-table-iterate-buffer-tables)
+*** Evaluate the "Library of Babel" code block under 'update tables'
+    With your cursor on the code block, 'C-c C-c'
+    Setting (org-confirm-babel-evaluate nil) will remove the yes/no prompt; however, be sure to read the below information before doing this.
+**** More information about evaluating code blocks
+     http://orgmode.org/manual/Evaluating-code-blocks.html#Evaluating-code-blocks
+     http://orgmode.org/manual/Code-evaluation-security.html#Code-evaluation-security
+
+** 5.) Daily, log your progress toward achieving your ShouldDo activities under the day of the week headings in the 'activities log' table
+
+** 6.) Be sure to execute 'org-table-iterate-buffer-tables' (see step 4 above) and save your shouldDo.org file before your weekly cron job runs
+
+
+** Hints
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+*** Columns automatically realign when you hit TAB (with your cursor in a table).
+*** Rows that start with '#' automatically (re)calculate when you hit TAB.
+*** Fields not intended to be edited will automatically "correct" when you hit TAB.
+*** If you hose up a table, formula, etc. -- just copy/paste it from a fresh copy of shouldDO.org (from [[http://shouldDO.org][shouldDO.org]]).
+*** An "Args out of range" error will occur until you have a history of 52 (or more) weeks, it is safe to ignore this error.
+*** Table formulas are long -- but will not get in your way if you have truncate-lines on (or visual-line-mode off).
+**** I often toggle visual-line-mode, with the following in my .emacs file, its as easy as pressing F7
+     ;; easy word wrap
+     (global-set-key (kbd "<f7>") 'visual-line-mode)
+     (global-set-key (kbd "C-<f7>") 'toggle-truncate-lines)
+
+
+** Upgrade
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+*** v1.7.0 to v1.7.1
+**** There is no need to upgrade your shouldDo.org file (see changelog below for details)
+**** Replace shouldDo_newWeek.sh with shouldDo_newWeek.py; be sure to set the file paths in SETTINGS
+
+*** v1.* to v1.7.0
+**** To upgrade from a prior version of shouldDO, just replace the tables under 'view history' and 'edit activities' in this file with the same tables from your prior version shouldDO.org file.
+
+** Customization
+   :PROPERTIES:
+   :VISIBILITY: folded
+   :END:
+*** If you are not using it, you can remove the 'update tables' section in the shouldDo.org file.
+*** You can relocate the tables within the shouldDo.org file without affecting the functionality.
+*** To change the start of week to Sunday, instead of Monday, change two portions of the formula for the 'activities log' table
+**** day of the week headers, i.e,
+     change this:
+     ::@1$4=Mo::@1$5=Tu::@1$6=We::@1$7=Th::@1$8=Fr::@1$9=Sa::@1$10=Su
+     to this:
+     ::@1$4=Su::@1$5=Mo::@1$6=Tu::@1$7=We::@1$8=Th::@1$9=Fr::@1$10=Sa
+**** week (of the year) number, i.e.,
+     change this:
+     ::@12$5='(print(format-time-string "%W"))
+     to this:
+     ::@12$5='(print(format-time-string "%U"))
+
+*** If you make changes to the tables, be sure to address these dependencies:
+**** The 'shouldDo_newWeek.py' script is dependent on a specific format for the 'activities log' table.
+**** The 'shouldDo_newWeek.py' script is dependent on a specific format for the 'view history' table.
+**** The 'activities log' table reads data form the 'edit activities' table.
+**** The 'scores' table reads data from the 'view history' table.
+
+*** For information on Org-Mode's table editor's spreadsheet-like capabilities, see:
+    http://orgmode.org/manual/The-spreadsheet.html#The-spreadsheet
+
+
+
+* changelog
+** v1.7.1
+*** shouldDo.org
+Moved 'about' and 'setup' sections from shouldDo.org to README.org
+Removed example daily entries from 'activities log'
+*** shouldDo_newWeek.py
+This Python script replaces the shell script (shouldDo_newWeek.sh)
+Successful completion of the script will not produce output (shouldDo_newWeek.sh echo'ed file locations)
+*** README.org
+Edited 'about' and 'setup'
+Added changelog
+
+#+STARTUP: showall
